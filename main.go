@@ -1,12 +1,12 @@
 package main
 
 import (
-	"time"
 	"fmt"
-	"log"
 	"github.com/namsral/flag"
 	"gopkg.in/virgil.v5/sdk"
 	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
+	"log"
+	"time"
 )
 
 // crypto vars
@@ -18,7 +18,8 @@ var (
 
 // config vars
 var (
-	config             string
+	//config             string
+	apiUrl             string
 	privateKeyStr      string
 	privateKeyPassword string
 	appId              string
@@ -29,8 +30,10 @@ var (
 )
 
 func main() {
+	flag.String(flag.DefaultConfigFlagname, "", "path to config file")
+	//flag.StringVar(&config, "config", "", "Config file with variables - optional. Can parse both variables from config and CLI")
+	flag.StringVar(&apiUrl, "apiUrl", "https://api.virgilsecurity.com", "api url address")
 
-	flag.StringVar(&config, "config", "", "Config file with variables - optional. Can parse both variables from config and CLI")
 	flag.StringVar(&privateKeyStr, "privateKeyStr", "", "Private Api Key generated at dashboard.virgilsecurity.com. Required")
 	flag.StringVar(&privateKeyPassword, "privateKeyPassword", "", "Private key password - null by default")
 	flag.StringVar(&appId, "appId", "", "APP_ID in virgil dashboard. Required")
@@ -43,7 +46,7 @@ func main() {
 	privateKeyByte := []byte(privateKeyStr)
 
 	// verify required variables are set
-	requiredParams := [] string{
+	requiredParams := []string{
 		"privateKeyStr",
 		"appPubKeyId",
 		"appId",
@@ -53,7 +56,7 @@ func main() {
 	flagset := make(map[string]bool)
 	flag.Visit(func(f *flag.Flag) { flagset[f.Name] = true })
 	for _, param := range requiredParams {
-		if ! flagset[param] {
+		if !flagset[param] {
 			flag.Usage()
 			log.Fatalln(param, "required. Please specify all required variables")
 		}
@@ -76,8 +79,8 @@ func main() {
 	}
 
 	// curl cli example
-	SearchCard := fmt.Sprintf("#SearchCard example:\n curl -w '@curl-format.txt' -X POST -H 'Authorization: Virgil %s' -d '{\"identity\": \"%s\"}' https://api.virgilsecurity.com/card/v5/actions/search\n\n", token, identity)
+	SearchCard := fmt.Sprintf("#SearchCard example:\n curl -w '@curl-format.txt' -X POST -H 'Authorization: Virgil %s' -d '{\"identity\": \"%s\"}' %s/card/v5/actions/search\n\n", token, identity, apiUrl)
 	fmt.Printf(SearchCard)
-	GetCard := fmt.Sprintf("#getCard example:\n curl -w '@curl-format.txt' -X GET -H 'Authorization: Virgil %s' https://api.virgilsecurity.com/card/v5/%s\n", token, searchCard)
+	GetCard := fmt.Sprintf("#getCard example:\n curl -w '@curl-format.txt' -X GET -H 'Authorization: Virgil %s' %s/card/v5/%s\n", token, apiUrl, searchCard)
 	fmt.Printf(GetCard)
 }
